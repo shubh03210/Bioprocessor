@@ -3,7 +3,7 @@
 Proof-of-concept for Boston Bioprocess: rule-enforcing batch/unit-operation **Schedule**, plus a single-vessel **closed-loop control** demo (readings → forecast → feed command → live UI).
 
 **Repo:** https://github.com/shubh03210/Bioprocessor  
-**Status:** Phases 0–13 packaging ready (local + Render single-service). Remaining: live hosted URL in README, demo video, submission invites.
+**Status:** Live on Render. Remaining: demo video, PROMPTS polish, GitHub invites.
 
 ---
 
@@ -246,8 +246,12 @@ Opens http://127.0.0.1:8000/ (API + built UI together).
 
 ### Hosted Application
 
-TODO — paste Render URL here after first successful deploy (do not fabricate).
+**Live URL:** https://bioprocessor.onrender.com  
 
+- Schedule: https://bioprocessor.onrender.com/  
+- Control: https://bioprocessor.onrender.com/control  
+
+Free tier may cold-start slowly after idle (~30–60s).
 ## Demo Video
 
 TODO — ≤3 minute recording (see [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)).

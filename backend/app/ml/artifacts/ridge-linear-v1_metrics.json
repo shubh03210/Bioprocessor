@@ -1,0 +1,21 @@
+{
+  "model_version": "ridge-linear-v1",
+  "train_runs": [
+    "run_A.csv",
+    "run_B.csv"
+  ],
+  "holdout_run": "run_C.csv",
+  "history_minutes": 60,
+  "horizon_minutes": 10,
+  "train_windows": 4662,
+  "test_windows": 2331,
+  "model": {
+    "mae": 0.497697033813548,
+    "rmse": 0.89834068036904
+  },
+  "persistence_baseline": {
+    "mae": 0.5761323466323467,
+    "rmse": 1.0618651619980395
+  },
+  "artifact": "backend\\app\\ml\\artifacts\\ridge-linear-v1.joblib"
+}

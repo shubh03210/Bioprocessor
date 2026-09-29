@@ -27,9 +27,10 @@ frontend/.vite/
 .DS_Store
 Thumbs.db
 
-# ML artifacts (later)
-backend/app/ml/artifacts/*
-!backend/app/ml/artifacts/.gitkeep
+# ML artifacts — keep trained model so clones work without retrain
+# (retrain anytime with: python -m app.ml.train)
+!backend/app/ml/artifacts/
+!backend/app/ml/artifacts/**
 
 # Logs / recordings
 *.log

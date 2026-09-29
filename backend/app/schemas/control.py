@@ -81,6 +81,20 @@ class ControllerStepOut(BaseModel):
     command: CommandOut | None = None
 
 
+class ReplayStartIn(BaseModel):
+    run_id: Literal["A", "B", "C", "a", "b", "c"] = "A"
+    interval_s: float = Field(default=1.0, ge=0.2, le=10.0)
+
+
+class ReplayStatusOut(BaseModel):
+    running: bool
+    run_id: str | None = None
+    process_time_h: float | None = None
+    ticks_done: int = 0
+    message: str = "idle"
+    interval_s: float = 1.0
+
+
 class ControlStateOut(BaseModel):
     """Implementation extension for live UI / debugging."""
 

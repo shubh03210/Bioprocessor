@@ -132,3 +132,12 @@ export type ControllerStepResult = {
   reason: string
   command: ControlCommand | null
 }
+
+export type ReplayStatus = {
+  running: boolean
+  run_id: string | null
+  process_time_h: number | null
+  ticks_done: number
+  message: string
+  interval_s: number
+}

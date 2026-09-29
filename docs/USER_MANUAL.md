@@ -145,6 +145,17 @@ The page **refreshes automatically** every few seconds.
    - Solid line = measured / applied feed  
    - Same command markers on the time axis  
 
+### Play a fermentation run
+
+Charts only move when new process minutes are ingested. On the hosted demo, use the **Play A / Play B / Play C** buttons:
+
+1. Click **Play A** (or B / C) — process time advances about **one minute per wall-clock second**.  
+2. Watch DO and feed traces extend; forecast refreshes as history grows.  
+3. Click **Stop** when you want to pause.  
+4. If Send is blocked because a command is still pending, click **Cancel pending**.
+
+While a run is playing, accepted feed commands apply automatically when process time reaches their apply time (no separate simulator needed).
+
 ### Manual feed setpoint
 
 1. Enter a number between **0** and **30** (units: **mL/h**).  
@@ -159,7 +170,7 @@ The page **refreshes automatically** every few seconds.
 | `35` | **Rejected** — outside allowed range |
 
 Accepted commands apply at **current process time + 5 minutes** (actuator lag).  
-You may not see feed jump immediately on the chart until that apply time is reached in the demo data.
+With **Play** running, you will see feed respond once process time reaches that apply time.
 
 ### Run controller step
 
@@ -177,7 +188,7 @@ The right-hand list shows every failed command and **why**, for example:
 - Wrong unit  
 - Another feed command is still **pending**
 
-**Tip:** Only **one** pending feed command is allowed at a time. If Send is rejected for that reason, wait or clear the pending command in a full live demo; on the hosted demo, try again after the previous one has been applied/cleared, or use a value that should reject for a different reason (e.g. `35`) to see the reject list.
+**Tip:** Only **one** pending feed command is allowed at a time. Use **Cancel pending** to clear a stuck wait, or keep **Play** running until the apply time is reached.
 
 ---
 
@@ -187,9 +198,9 @@ The right-hand list shows every failed command and **why**, for example:
 2. On **Schedule**, find the highlighted violations.  
 3. Click **Charlie Bioreactor 1500L**, set start to **2025-10-24**, save — watch a violation clear.  
 4. Open **Control**.  
-5. Confirm DO/feed charts and forecast (dashed line) if available.  
+5. Click **Play A** and watch the DO/feed charts move.  
 6. Send feed **`8`**, then try **`35`** to see a rejection.  
-7. Optionally click **Run controller step**.
+7. Optionally click **Run controller step**. Use **Cancel pending** if Send is blocked.
 
 ---
 
@@ -200,8 +211,9 @@ The right-hand list shows every failed command and **why**, for example:
 | Page is blank / slow | Wait up to a minute; free hosting sleeps when idle. Refresh. |
 | Schedule looks empty | Expand the date range to include **Oct–Nov 2025**. |
 | Cannot edit an operation | It may be **completed** (locked). |
-| Forecast unavailable | Needs enough recent DO + feed history; refresh after the page has loaded fully. |
-| Send rejected “still pending” | Another feed command is waiting; try again later or try an out-of-bounds value (e.g. 35) only to see the reject message. |
+| Charts not moving | Click **Play A** (or B / C). Stop first if another run is already playing. |
+| Forecast unavailable | Needs enough recent DO + feed history; play a run for a minute, then refresh. |
+| Send rejected “still pending” | Click **Cancel pending**, or keep Play running until the previous command applies. |
 | Link shows error | Refresh the page; if the host just woke up, wait and refresh again. |
 
 ---

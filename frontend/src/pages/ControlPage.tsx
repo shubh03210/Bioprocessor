@@ -2,13 +2,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   ApiError,
+  cancelPendingCommands,
   createForecast,
   fetchControlState,
   fetchLatestForecast,
+  fetchReplayStatus,
   postCommand,
   runControllerStep,
+  startReplay,
+  stopReplay,
 } from '../api/client'
-import type { ControlCommand, ControlState, Forecast } from '../api/types'
+import type { ControlCommand, ControlState, Forecast, ReplayStatus } from '../api/types'
 import {
   ProcessChart,
   type ChartMarker,
@@ -43,6 +47,7 @@ function commandMarkers(commands: ControlCommand[]): ChartMarker[] {
 export function ControlPage() {
   const [state, setState] = useState<ControlState | null>(null)
   const [forecast, setForecast] = useState<Forecast | null>(null)
+  const [replay, setReplay] = useState<ReplayStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [setpoint, setSetpoint] = useState('8')
@@ -51,8 +56,12 @@ export function ControlPage() {
 
   const refresh = useCallback(async () => {
     try {
-      const next = await fetchControlState(2000)
+      const [next, replayNext] = await Promise.all([
+        fetchControlState(2000),
+        fetchReplayStatus().catch(() => null),
+      ])
       setState(next)
+      if (replayNext) setReplay(replayNext)
       setError(null)
 
       let latest = await fetchLatestForecast()
@@ -102,6 +111,12 @@ export function ControlPage() {
         .filter((c) => c.status === 'rejected')
         .slice()
         .reverse(),
+    [state],
+  )
+  const pendingCount = useMemo(
+    () =>
+      (state?.recent_commands ?? []).filter((c) => c.status === 'pending')
+        .length,
     [state],
   )
 
@@ -167,10 +182,79 @@ export function ControlPage() {
     }
   }
 
+  async function onPlay(runId: 'A' | 'B' | 'C') {
+    setBusy(true)
+    setSubmitMsg(null)
+    try {
+      const st = await startReplay(runId, 1)
+      setReplay(st)
+      setSubmitMsg(`Playing run ${runId} — charts advance ~1 process-minute per second.`)
+      await refresh()
+    } catch (err) {
+      setSubmitMsg(
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Could not start replay',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onStopReplay() {
+    setBusy(true)
+    try {
+      const st = await stopReplay()
+      setReplay(st)
+      setSubmitMsg('Replay stopped.')
+      await refresh()
+    } catch (err) {
+      setSubmitMsg(
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Could not stop replay',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onCancelPending() {
+    setBusy(true)
+    setSubmitMsg(null)
+    try {
+      const rows = await cancelPendingCommands()
+      setSubmitMsg(
+        rows.length === 0
+          ? 'No pending commands to cancel.'
+          : `Cancelled ${rows.length} pending command(s).`,
+      )
+      await refresh()
+    } catch (err) {
+      setSubmitMsg(
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Cancel failed',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const processTime =
     state?.current_process_time_h != null
       ? `${state.current_process_time_h.toFixed(3)} h`
       : '—'
+
+  const replayLabel = replay?.running
+    ? `run ${replay.run_id} · ${replay.ticks_done} ticks`
+    : (replay?.message ?? 'idle')
 
   return (
     <div className="control-page">
@@ -192,6 +276,12 @@ export function ControlPage() {
             <dd>{state?.reading_count ?? 0}</dd>
           </div>
           <div>
+            <dt>Replay</dt>
+            <dd className={replay?.running ? 'status-ok' : undefined}>
+              {replayLabel}
+            </dd>
+          </div>
+          <div>
             <dt>Forecast</dt>
             <dd>
               {forecast
@@ -209,6 +299,44 @@ export function ControlPage() {
       </header>
 
       {error ? <div className="banner error">{error}</div> : null}
+
+      <section className="replay-bar">
+        <div className="replay-label">
+          <strong>Play run</strong>
+          <span className="muted">
+            Streams run CSV into the live charts (~1 process-min / wall-sec).
+            Pending setpoints apply when process time catches up.
+          </span>
+        </div>
+        <div className="setpoint-row">
+          {(['A', 'B', 'C'] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              disabled={busy || Boolean(replay?.running)}
+              onClick={() => void onPlay(id)}
+            >
+              Play {id}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy || !replay?.running}
+            onClick={() => void onStopReplay()}
+          >
+            Stop
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy || pendingCount === 0}
+            onClick={() => void onCancelPending()}
+          >
+            Cancel pending{pendingCount > 0 ? ` (${pendingCount})` : ''}
+          </button>
+        </div>
+      </section>
 
       <ProcessChart
         title="Dissolved oxygen"
@@ -256,8 +384,9 @@ export function ControlPage() {
             </button>
           </div>
           <p className="hint">
-            Commands apply at process time + 5 min lag (0–30 mL/h). Rejects are
-            stored and listed below.
+            Commands apply at process time + 5 min lag (0–30 mL/h). While a run
+            is playing, pending commands apply automatically when that time is
+            reached. Use Cancel pending to clear a stuck wait.
           </p>
           {submitMsg ? <p className="submit-msg">{submitMsg}</p> : null}
         </form>

@@ -7,6 +7,7 @@ import type {
   Forecast,
   HealthResponse,
   MutationResult,
+  ReplayStatus,
   ScheduleResponse,
   UnitOperationPayload,
 } from './types'
@@ -105,4 +106,28 @@ export async function postCommand(
 
 export async function runControllerStep(): Promise<ControllerStepResult> {
   return request<ControllerStepResult>('/api/control/step', { method: 'POST' })
+}
+
+export async function fetchReplayStatus(): Promise<ReplayStatus> {
+  return request<ReplayStatus>('/api/control/replay')
+}
+
+export async function startReplay(
+  runId: 'A' | 'B' | 'C',
+  intervalS = 1,
+): Promise<ReplayStatus> {
+  return request<ReplayStatus>('/api/control/replay/start', {
+    method: 'POST',
+    body: JSON.stringify({ run_id: runId, interval_s: intervalS }),
+  })
+}
+
+export async function stopReplay(): Promise<ReplayStatus> {
+  return request<ReplayStatus>('/api/control/replay/stop', { method: 'POST' })
+}
+
+export async function cancelPendingCommands(): Promise<ControlCommand[]> {
+  return request<ControlCommand[]>('/api/control/commands/cancel-pending', {
+    method: 'POST',
+  })
 }

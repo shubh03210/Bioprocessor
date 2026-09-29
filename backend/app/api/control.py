@@ -2,21 +2,37 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import JSONResponse
 from sqlmodel import Session
 
 from app.api.deps import get_db
+from app.api.errors import json_error
 from app.schemas.control import (
     CommandOut,
     ControlStateOut,
     ControllerStepOut,
     ReadingOut,
+    ReplayStartIn,
+    ReplayStatusOut,
 )
 from app.services.command import CommandService
 from app.services.controller import ControllerService
 from app.services.ingest import IngestService
+from app.services.replay import get_replay_worker
 
 router = APIRouter(prefix="/control", tags=["control"])
+
+
+def _replay_out(st) -> ReplayStatusOut:
+    return ReplayStatusOut(
+        running=st.running,
+        run_id=st.run_id,
+        process_time_h=st.process_time_h,
+        ticks_done=st.ticks_done,
+        message=st.message,
+        interval_s=st.interval_s,
+    )
 
 
 @router.get("/state", response_model=ControlStateOut)
@@ -45,15 +61,24 @@ def get_pending_commands(
     return [CommandOut.model_validate(r) for r in rows]
 
 
+@router.post("/commands/cancel-pending", response_model=list[CommandOut])
+def cancel_pending_commands(
+    session: Session = Depends(get_db),
+) -> list[CommandOut]:
+    """Reject all pending feed commands so a new setpoint can be sent."""
+    rows = CommandService(session).cancel_pending()
+    return [CommandOut.model_validate(r) for r in rows]
+
+
 @router.post("/commands/{command_id}/ack", response_model=CommandOut)
 def ack_command(
     command_id: int,
     session: Session = Depends(get_db),
-) -> CommandOut:
+) -> CommandOut | JSONResponse:
     """Device acknowledges a pending command was applied locally."""
     row = CommandService(session).ack_applied(command_id)
     if row is None:
-        raise HTTPException(status_code=404, detail="command not found")
+        return json_error(404, "not_found", "command not found")
     return CommandOut.model_validate(row)
 
 
@@ -65,3 +90,27 @@ def controller_step(session: Session = Depends(get_db)) -> ControllerStepOut:
     if decision.result is not None:
         command = CommandOut.model_validate(decision.result.command)
     return ControllerStepOut(acted=decision.acted, reason=decision.reason, command=command)
+
+
+@router.get("/replay", response_model=ReplayStatusOut)
+def get_replay_status() -> ReplayStatusOut:
+    """Hosted run-replay status (Play A/B/C)."""
+    return _replay_out(get_replay_worker().status())
+
+
+@router.post("/replay/start", response_model=ReplayStatusOut)
+def start_replay(body: ReplayStartIn) -> ReplayStatusOut | JSONResponse:
+    """Stream run_A/B/C minute-by-minute into ingest (charts move without external sim)."""
+    worker = get_replay_worker()
+    try:
+        st = worker.start(body.run_id, interval_s=body.interval_s)
+    except RuntimeError as exc:
+        return json_error(409, "conflict", str(exc))
+    except (ValueError, FileNotFoundError) as exc:
+        return json_error(400, "invalid_request", str(exc))
+    return _replay_out(st)
+
+
+@router.post("/replay/stop", response_model=ReplayStatusOut)
+def stop_replay() -> ReplayStatusOut:
+    return _replay_out(get_replay_worker().stop())

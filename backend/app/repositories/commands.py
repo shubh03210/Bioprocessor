@@ -61,6 +61,26 @@ def mark_applied(
     return row
 
 
+def cancel_all_pending(
+    session: Session,
+    *,
+    reason: str = "cancelled by operator",
+    commit: bool = True,
+) -> list[ControlCommand]:
+    pending = list_pending(session)
+    for row in pending:
+        row.status = ControlCommandStatus.REJECTED.value
+        row.reject_reason = reason
+        session.add(row)
+    if commit and pending:
+        session.commit()
+        for row in pending:
+            session.refresh(row)
+    elif pending:
+        session.flush()
+    return pending
+
+
 def has_pending(session: Session, setpoint_name: str) -> bool:
     return len(list_pending(session, setpoint_name=setpoint_name)) > 0
 

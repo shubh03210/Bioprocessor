@@ -93,5 +93,8 @@ class CommandService:
     def ack_applied(self, command_id: int) -> ControlCommand | None:
         return commands_repo.mark_applied(self.session, command_id)
 
+    def cancel_pending(self, *, reason: str = "cancelled by operator") -> list[ControlCommand]:
+        return commands_repo.cancel_all_pending(self.session, reason=reason)
+
     def recent(self, *, limit: int = 50) -> list[ControlCommand]:
         return commands_repo.list_recent_commands(self.session, limit=limit)

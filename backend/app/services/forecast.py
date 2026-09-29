@@ -30,16 +30,21 @@ class ForecastService:
         self.session = session
 
     def _histories_from_db(self) -> tuple[list[float], list[float], float] | None:
-        # Pull enough recent rows (60 minutes * 2 signals * some slack)
-        rows = readings_repo.list_recent_readings(self.session, limit=HISTORY_MINUTES * 4)
+        # Fetch DO and feed separately — mixed-signal limit under-counts when
+        # the same process minutes were ingested more than once.
+        per_signal = HISTORY_MINUTES * 4
+        do_rows = readings_repo.list_recent_signal_values(
+            self.session, "DO", limit=per_signal
+        )
+        feed_rows = readings_repo.list_recent_signal_values(
+            self.session, "feed_rate", limit=per_signal
+        )
         do_by: dict[int, float] = {}
         feed_by: dict[int, float] = {}
-        for r in rows:
-            m = minute_index(r.time_h)
-            if r.signal_name == "DO":
-                do_by[m] = r.value
-            elif r.signal_name == "feed_rate":
-                feed_by[m] = r.value
+        for r in do_rows:
+            do_by[minute_index(r.time_h)] = r.value
+        for r in feed_rows:
+            feed_by[minute_index(r.time_h)] = r.value
         built = series_from_minute_maps(do_by, feed_by)
         if built is None:
             return None

@@ -44,5 +44,15 @@ def list_recent_readings(
     return rows
 
 
+def list_recent_signal_values(
+    session: Session,
+    signal_name: str,
+    *,
+    limit: int = 200,
+) -> list[Reading]:
+    """Latest rows for one signal (handles duplicate timestamps from re-ingest)."""
+    return list_recent_readings(session, limit=limit, signal_name=signal_name)
+
+
 def count_readings(session: Session) -> int:
     return int(session.exec(select(func.count()).select_from(Reading)).one())

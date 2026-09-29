@@ -113,14 +113,14 @@ Legend: `NOT STARTED` | `IN PROGRESS` | `DONE` | `BLOCKED`
 |----|-------------|--------|--------|
 | S-001 | Private GitHub repo named `<your_name>_bbp` | §4.1 | NOT STARTED |
 | S-002 | Invite VinitBB and FanLu55 | §4.1 | NOT STARTED |
-| S-003 | Hosted link to running application | §4.2 | NOT STARTED |
+| S-003 | Hosted link to running application | §4.2 | DONE |
 | S-004 | Hosting required; Docker not required | §4.2 | DONE (packaging; no Docker) |
 | S-005 | Screen recording ≤3 minutes | §4.3 | NOT STARTED |
 | S-006 | Demo shows Gantt with violations highlighted | §4.3 | NOT STARTED |
 | S-007 | Demo shows edit clearing a violation | §4.3 | NOT STARTED |
 | S-008 | Demo shows control loop: readings, forecast, command, device response | §4.3 | NOT STARTED |
 | S-009 | README: how to run locally | §4.4 | NOT STARTED |
-| S-010 | README: hosted URL | §4.4 | NOT STARTED |
+| S-010 | README: hosted URL | §4.4 | DONE |
 | S-011 | README: How I split and evaluated the forecaster | §4.4 | DONE |
 | S-012 | README: Decisions and trade-offs (≥2) | §4.4 | NOT STARTED |
 | S-013 | README: How I would deploy, retrain and monitor this | §4.4 | NOT STARTED |

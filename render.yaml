@@ -1,0 +1,27 @@
+# Render Blueprint — single web service (API + built SPA). No Docker.
+# Connect this repo in Render Dashboard → New → Blueprint, or create a Web Service
+# with the same build/start commands manually.
+services:
+  - type: web
+    name: bioprocessor
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: bash scripts/render-build.sh
+    startCommand: bash scripts/render-start.sh
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: BOOTSTRAP_ON_STARTUP
+        value: "true"
+      - key: SEED_CONTROL_READINGS
+        value: "true"
+      - key: DATABASE_URL
+        value: sqlite:///./bbp.db
+      - key: DATA_KIT_PATH
+        value: ../data_kit
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: "3.11.9"

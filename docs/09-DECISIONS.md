@@ -107,13 +107,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Decision** | TBD hosting provider |
+| **Decision** | Single Render (or compatible PaaS) web service: FastAPI serves API + Vite `dist` |
 | **Context** | Hosting required; Docker not required |
-| **Options** | Railway, Render, Fly.io, Vercel+separate API, etc. |
-| **Chosen approach** | TBD in Phase 13 |
-| **Reason** | Depends on final process model (simulator process needs to run) |
-| **Trade-offs** | Free-tier sleep vs always-on for demo |
-| **Status** | OPEN |
+| **Options** | Railway, Render, Fly.io, Vercel+separate API, Docker |
+| **Chosen approach** | No Docker; commit Vite build under `backend/app/static`; Render `pip install` + uvicorn with `BOOTSTRAP_ON_STARTUP=true` (migrate + schedule seed + optional control readings from run_A) |
+| **Reason** | One URL for reviewers; Schedule works immediately; Control has seeded history without a live simulator process |
+| **Trade-offs** | Free tier sleeps; SQLite is ephemeral on free disk (re-bootstrap on cold start); live simulator not always-on |
+| **Status** | ACCEPTED |
 
 ---
 
@@ -226,3 +226,4 @@
 | 0.5 | 2026-09-29 | ADR-006 custom Gantt accepted |
 | 0.6 | 2026-09-29 | ADR-007 Ridge linear accepted after hold-out eval |
 | 0.7 | 2026-09-29 | ADR-015 reactive controller + dwell |
+| 0.8 | 2026-09-29 | ADR-008 single-service Render hosting |

@@ -207,6 +207,7 @@
 | **Dependencies** | Phase 11 |
 | **Acceptance** | Non-technical user can open hosted app |
 | **DoD** | URL in README (no fabricated URL before real deploy) |
+| **Status** | PACKAGING DONE (2026-09-29) — await live Render URL in README |
 
 ---
 

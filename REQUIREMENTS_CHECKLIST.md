@@ -114,7 +114,7 @@ Legend: `NOT STARTED` | `IN PROGRESS` | `DONE` | `BLOCKED`
 | S-001 | Private GitHub repo named `<your_name>_bbp` | §4.1 | NOT STARTED |
 | S-002 | Invite VinitBB and FanLu55 | §4.1 | NOT STARTED |
 | S-003 | Hosted link to running application | §4.2 | NOT STARTED |
-| S-004 | Hosting required; Docker not required | §4.2 | NOT STARTED |
+| S-004 | Hosting required; Docker not required | §4.2 | DONE (packaging; no Docker) |
 | S-005 | Screen recording ≤3 minutes | §4.3 | NOT STARTED |
 | S-006 | Demo shows Gantt with violations highlighted | §4.3 | NOT STARTED |
 | S-007 | Demo shows edit clearing a violation | §4.3 | NOT STARTED |
@@ -147,6 +147,7 @@ Legend: `NOT STARTED` | `IN PROGRESS` | `DONE` | `BLOCKED`
 | G-012 | Phase 10 live control UI | Implementation plan Phase 10 | DONE |
 | G-013 | Phase 11 E2E demo / integration | Implementation plan Phase 11 | DONE |
 | G-014 | Phase 12 automated testing | Implementation plan Phase 12 | DONE |
+| G-015 | Phase 13 hosting packaging (await live URL) | Implementation plan Phase 13 | DONE (packaging); URL NOT STARTED |
 
 ---
 

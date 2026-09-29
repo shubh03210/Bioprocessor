@@ -28,5 +28,12 @@ class Settings(BaseSettings):
     controller_dwell_process_minutes: float = 5.0
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # Production packaging (Phase 13)
+    bootstrap_on_startup: bool = False
+    seed_control_readings: bool = True
+    seed_control_minutes: int = 70
+    # Directory with Vite build output (index.html + assets/). Empty = try app/static.
+    static_dir: str = ""
+
 
 settings = Settings()

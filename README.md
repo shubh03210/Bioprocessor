@@ -3,7 +3,7 @@
 Proof-of-concept for Boston Bioprocess: rule-enforcing batch/unit-operation **Schedule**, plus a single-vessel **closed-loop control** demo (readings → forecast → feed command → live UI).
 
 **Repo:** https://github.com/shubh03210/Bioprocessor  
-**Status:** Local app ready (Phases 0–12). Remaining: hosting URL, demo video, submission polish.
+**Status:** Phases 0–13 packaging ready (local + Render single-service). Remaining: live hosted URL in README, demo video, submission invites.
 
 ---
 
@@ -215,11 +215,38 @@ See [`docs/09-DECISIONS.md`](docs/09-DECISIONS.md). Highlights:
 
 ## How I would deploy, retrain and monitor this
 
-TODO — Phase 13/14 (hosting + ops notes).
+**Deploy (no Docker):** one web service builds the Vite SPA into `backend/app/static` and runs uvicorn (see **Hosting** below / ADR-008). On start: migrate + seed schedule + seed ~70 min of `run_A` readings so Control has history without a live simulator.
 
-## Hosted Application
+**Retrain:** offline `python -m app.ml.train` on new runs; commit or release the `.joblib` artifact; restart service. Prefer versioned `model_version` on prediction rows.
 
-TODO — URL after deployment.
+**Monitor:** health `/api/health`; log ingest accept counts, command reject reasons, forecast skip (insufficient history); alert on 5xx and bootstrap failure. Free-tier sleep is acceptable for a take-home demo.
+
+## Hosting (Phase 13)
+
+Packaging is in-repo (`render.yaml`, `scripts/render-build.sh`, `scripts/render-start.sh`). **No Docker.**  
+The production UI is the committed build in `backend/app/static` (rebuild with `.\scripts\build-static.ps1` after frontend changes).
+
+### Option A — Render (recommended)
+
+1. Go to [Render](https://render.com) → **New** → **Blueprint** (or **Web Service**) and connect https://github.com/shubh03210/Bioprocessor  
+2. If manual Web Service:
+   - **Root directory:** (repo root)
+   - **Build:** `bash scripts/render-build.sh`
+   - **Start:** `bash scripts/render-start.sh`
+   - **Health:** `/api/health`
+3. After deploy, open the public URL — Schedule + Control on the **same origin**.
+4. Paste that URL into **Hosted Application** below.
+### Option B — Local production check
+
+```powershell
+.\scripts\run-prod-local.ps1
+```
+
+Opens http://127.0.0.1:8000/ (API + built UI together).
+
+### Hosted Application
+
+TODO — paste Render URL here after first successful deploy (do not fabricate).
 
 ## Demo Video
 

@@ -1,0 +1,36 @@
+# Python
+.venv/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/bbp.db
+backend/*.db
+*.sqlite3
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env / secrets
+.env
+.env.local
+**/.env
+
+# IDE / OS
+.idea/
+.vscode/
+.cursor/
+.DS_Store
+Thumbs.db
+
+# ML artifacts (later)
+backend/app/ml/artifacts/*
+!backend/app/ml/artifacts/.gitkeep
+
+# Logs / recordings
+*.log
+demo/*.mp4
